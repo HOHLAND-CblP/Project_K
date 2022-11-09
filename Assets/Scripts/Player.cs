@@ -17,6 +17,7 @@ public class Player
     {
         this.id = id;
         name = "";
+        color = Color.white;
 
         this.count = count;
         countElem = new int[3];
@@ -29,6 +30,7 @@ public class Player
     {
         this.id = id;
         this.name = name;
+        color = Color.white;
 
         countElem = new int[3];
         for (int i = 0; i < 3; i++)

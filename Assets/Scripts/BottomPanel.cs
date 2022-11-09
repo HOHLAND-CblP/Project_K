@@ -11,17 +11,6 @@ public class BottomPanel : MonoBehaviour
     [SerializeField] TextMeshProUGUI[] countTexts;
 
 
-    void Start()
-    {
-        
-    }
-
-
-    void Update()
-    {
-        
-    }
-
     public void ChangeColor(Color color)
     {
         foreach(var button in buttons)

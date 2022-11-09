@@ -13,7 +13,11 @@ public class ColorPanel : MonoBehaviour
 
     public void Activate(Button button)
     {
-        curButton = button;    
+        curButton = button;
+
+        
+        transform.localPosition = new Vector3(150, button.transform.localPosition.y);
+        
     }
 
     public void Deactivate(Image image)

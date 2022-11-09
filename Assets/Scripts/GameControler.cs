@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.Advertisements;
 using TMPro;
 
 public class GameControler : MonoBehaviour
@@ -14,7 +15,7 @@ public class GameControler : MonoBehaviour
     
     Button curSizeButton;
 
-
+    List<Player> players;
     Player firstPlayer;
     Player secondPlayer;
 
@@ -22,6 +23,9 @@ public class GameControler : MonoBehaviour
     int curSIze;
     int curSizeFP;
     int curSizeSP;
+
+    [Space]
+    [SerializeField] AdsManager adsManager;
 
 
 
@@ -31,8 +35,8 @@ public class GameControler : MonoBehaviour
     public GameObject cellsContainer;
 
     [Header("Parametrs")]
-    public Color firstPlayerColor;
-    public Color secondPlayerColor;
+    Color firstPlayerColor = Color.white;
+    Color secondPlayerColor = Color.white;
     bool isFirstPlayerChangeColor;
 
 
@@ -64,6 +68,10 @@ public class GameControler : MonoBehaviour
     //cash
     Camera mainCamera;
 
+    private void Awake()
+    {
+        players = new List<Player>();
+    }
 
     void Start()
     {
@@ -74,6 +82,10 @@ public class GameControler : MonoBehaviour
 
         objs = new GameObject[gridSize, gridSize];
 
+        for(int i = 0; i<2;i++)
+        {
+            players.Add(new Player(i, gridSize));
+        }
 
         firstPlayer = new Player(0, gridSize);
         secondPlayer = new Player(1, gridSize);
@@ -203,6 +215,12 @@ public class GameControler : MonoBehaviour
 
     void StartPlayerTurn(Player player)
     {
+        if (!CanPlayerTurn(player))
+        {
+            GameEndDraw();
+            return;
+        }
+
         if (firstPlayerTurn)
         {
             curSIze = curSizeFP;
@@ -218,6 +236,54 @@ public class GameControler : MonoBehaviour
         header.text = player.name + " is moving";
 
 
+        CurrentSizeSelection(player);
+
+
+        switch (curSIze)
+        {
+            case 1:
+                SetBackgroundSizeButton(smallCircleButton);
+                break;
+            case 2:
+                SetBackgroundSizeButton(mediumCircleButton);
+                break;
+            case 3:
+                SetBackgroundSizeButton(bigCircleButton);
+                break;
+        }
+
+
+        for (int i = 0; i < gridSize; i++)
+        { 
+            circleCountText[i].text = player.GetCountElem(i).ToString();
+        }
+    }
+
+    bool CanPlayerTurn(Player player)
+    {
+        if (player.GetCountElem(0) == 0 && player.GetCountElem(1) == 0 && player.GetCountElem(2) == 0)
+            return false;
+
+        int smallCircleCoincidence = 0;
+        int middleCircleCoincidence = 0;
+        for (int x = 0; x < gridSize; x++)
+            for (int y = 0; y < gridSize; y++)
+            {
+                if (player.GetCountElem(0) != 0 && grid[x, y] != null && grid[x, y].size >= 1)
+                    smallCircleCoincidence++;
+
+                if (player.GetCountElem(1) != 0 && grid[x, y] != null && grid[x, y].size >= 2)
+                    middleCircleCoincidence++;
+            }
+
+        if (smallCircleCoincidence == gridSize * gridSize && (middleCircleCoincidence == gridSize * gridSize || player.GetCountElem(1) == 0))
+            return false;
+
+        return true;
+    }
+
+    void CurrentSizeSelection(Player player)
+    {
         int countOfEndedCircle = 0;
 
 
@@ -264,27 +330,10 @@ public class GameControler : MonoBehaviour
         {
             bigCircleButton.interactable = true;
         }
-
-
-        switch (curSIze)
-        {
-            case 1:
-                SetBackgroundSizeButton(smallCircleButton);
-                break;
-            case 2:
-                SetBackgroundSizeButton(mediumCircleButton);
-                break;
-            case 3:
-                SetBackgroundSizeButton(bigCircleButton);
-                break;
-        }
-
-
-        for (int i = 0; i < gridSize; i++)
-        {
-            circleCountText[i].text = player.GetCountElem(i).ToString();
-        }
     }
+
+
+   
 
 
     void PlayerTurn(Player player, int x, int y)
@@ -382,6 +431,9 @@ public class GameControler : MonoBehaviour
     }
 
 
+    
+
+
     public void Revansh()
     {
         foreach(var obj in objs)
@@ -444,13 +496,25 @@ public class GameControler : MonoBehaviour
             gameEndPanel.transform.GetChild(1).GetComponent<TextMeshProUGUI>().text = firstPlayer.name + " Win";
         else
             gameEndPanel.transform.GetChild(1).GetComponent<TextMeshProUGUI>().text = secondPlayer.name + " Win";
+
+        ShowAdd();
     }
 
     void GameEndDraw()
     {
         gameEndPanel.SetActive(true);
-        gameEndPanel.transform.GetChild(1).GetComponent<TextMeshProUGUI>().text = "Ничья";
+        gameEndPanel.transform.GetChild(1).GetComponent<TextMeshProUGUI>().text = "Draw";
+
+        ShowAdd();
     }
+
+
+    void ShowAdd()
+    {
+        adsManager.ShowAdd();
+    }
+
+
 
     public void SetSize(int size)
     {
